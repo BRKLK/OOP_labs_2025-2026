@@ -1,29 +1,32 @@
 # """
 # Создать класс Angle для хранения углов
-#  - хранить внутреннее состоние угла в радианах
+#  - хранить внутреннее состояние угла в радианах
 #  - возможность создания угла в радианах и градусах
-#  - реализовать присваивание и получение угла в раддианах и градусах
-#  - реализовать сранение углов с учетом, что 2 Pi*N + x = x, где Pi=3.14.1529..., N-целое 
-#  - релизовать перобразование угла в строку, float, int, str
+#  - реализовать присваивание и получение угла в радианах и градусах
+#  - реализовать сравнение углов с учетом, что 2 Pi*N + x = x, где Pi=3.14.1529..., N-целое
+#  - реализовать преобразование угла в строку, float, int, str
 #  - реализовать сравнение углов
 #  - реализовать сложение (в том числе с float и int, считая, что они заданы в радианах), вычитание (считая, что они заданы в радианах), умножение и деление на число
-#  - реализовать строкове представление объекта (str, repr)  
+#  - реализовать строковое представление объекта (str, repr)
 
-# Создать класс AngleRange для хранения промежтка для углов
-#  - Реализовать механизм создания объекта через задание начальной и конечной точки промежукта в виде углов float, int или Angle
+# Создать класс AngleRange для хранения промежутка для углов
+#  - Реализовать механизм создания объекта через задание начальной и конечной точки промежутка в виде углов float, int или Angle
 #  - Предусмотреть возможность использования включающих и исключающих промежутков
 #  - реализовать возможность сравнения объектов на эквивалентность (eq)
-#  - реализовать строкове представление объекта (str, repr)
+#  - реализовать строковое представление объекта (str, repr)
 #  - реализовать получение длины промежутка (abs или отдельны метод)
 #  - реализовать сравнение промежутков
 #  - реализовать операцию in для проверки входит один промежуток в другой или угол в промежуток
-#  - реализовать операции сложения, вычитания  (результат в общем виде - список промежутков)
+#  - реализовать операции сложения, вычитания (результат в общем виде - список промежутков)
 # """
 
 
 from math import pi, isclose
 from operator import truediv
 from typing import Self
+# from typing import TypeVar, Type
+
+# T = TypeVar("T", bound="ClassName")
 
 class Angle:
     def __init__(self, angle: float) -> None:
@@ -144,10 +147,20 @@ class AngleRange():
         else:
             return 2*pi - (self.start_point - self.end_point)
 
-    
+    def cut_range(self):
+        if (self.end_point - self.start_point) % (2*pi) == 0 and (self.start_point != self.end_point):
+            start = self.start_point % (2*pi)
+            end = self.end_point % (2*pi) + (2*pi)
+        else:
+            start = self.start_point % (2*pi)
+            end = self.end_point % (2*pi)
+        return start, end
+        
     def __eq__(self, other: Self) -> bool:
-        return (self.start_point == other.start_point) and \
-            (self.end_point == other.end_point) and \
+        s_start, s_end = self.cut_range()
+        o_start, o_end = other.cut_range()
+        return (s_start == o_start) and \
+            (s_end == o_end) and \
             (self.__abs__() == other.__abs__())
     
     def __ne__(self, other: Self) -> bool:
@@ -173,6 +186,7 @@ class AngleRange():
     def __str__(self):
         return self.__repr__()
     
+        
     # Вспомогательный метод
     def split_range(self):
         if (self.end_point - self.start_point) % (2*pi) == 0 and (self.start_point != self.end_point):
@@ -190,8 +204,8 @@ class AngleRange():
     
     # Проверка in
     def __contains__(self, other: Self | Angle) -> bool:
-        if isinstance(other, Self):
-            if other < self:
+        if isinstance(other, type(self)):
+            if other > self:
                 return False
         
 
@@ -215,20 +229,6 @@ class AngleRange():
                 for seg_other in other_parts
             )
 
-            
-            # def contains_angle(a: Angle):
-            #     start   = self.start_point % (2*pi)
-            #     end     = self.end_point % (2*pi)
-
-            #     if start <= end:
-            #         if (a > start) and (a < end): return True
-            #     else:
-            #         if (a < end) or (a > start): return True
-
-            #     if a == start and self.include_start: return True
-            #     if a == end and self.include_end: return True
-
-            #     return False
 
         else:
             return self.__contains__(Self.from_angle(other))
@@ -517,5 +517,39 @@ def test_sub():
             print("  part:", r)
 
 # Запуск тестов
-# test_add()
+test_add()
 test_sub()
+print("=" * 10)
+a1 = AngleRange(pi/4, pi/2)
+a2 = AngleRange(3*pi/2, pi/2)
+a3 = AngleRange(pi/6, 5*pi/6)
+b = AngleRange(0, pi)
+print(a1 in b)
+print(a2 in b)
+print(a3 in b)
+e1 = AngleRange(pi/2, pi)
+e2 = AngleRange(5*pi/2, 3*pi)
+print(e1 == e2)
+print("=" * 10)
+c1 = Angle.from_degree(180)
+c1 = AngleRange.from_angle(c1)
+c2 = Angle.from_degree(270)
+c2 = AngleRange.from_angle(c2)
+q = AngleRange(3*pi/2, 5*pi/4)
+print(c1 in q)
+print(c2 in q)
+print("="*10)
+
+ang1 = Angle(pi/2)
+ang2 = Angle(pi/2)
+ang3 = Angle(pi)
+print(ang1 + ang2)
+print(ang1 + pi)
+print(ang1 * 2)
+print(ang3 - ang2)
+print(ang3 > ang1)
+print(ang1 == ang2)
+print("="*10)
+print(float(ang1))
+print(int(ang1))
+print(str(ang1))
