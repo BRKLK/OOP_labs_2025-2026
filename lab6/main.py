@@ -15,7 +15,7 @@ class Command(ABC):
         ...
 
     def is_printed(self) -> bool:
-        return False
+        ...
 
 class Keyboard:
     def __init__(self, file_to_safe: str) -> None:
