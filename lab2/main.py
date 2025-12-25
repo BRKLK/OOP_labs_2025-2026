@@ -71,3 +71,7 @@ class Printer():
 with Printer(font7, Color.GREEN, (2, 3), "$") as printer:
     printer.print("Hello,")
     printer.print("World!")
+
+with Printer(font5, Color.BLUE, (2, 3), "0") as printer:
+    printer.print("Hello,")
+    printer.print("World!")
